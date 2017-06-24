@@ -17,9 +17,12 @@ import javafx.application.*;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -30,11 +33,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
+import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -47,7 +54,15 @@ public class Media_Player extends Application{
 
 
 	@Override
-	public void start(Stage args) throws IOException {
+	public void start(final Stage args) throws IOException {
+		
+		String filepath;
+		FileChooser open=new FileChooser();
+		FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Select a file","*.mp4");
+	    open.getExtensionFilters().add(filter);
+	    File file= open.showOpenDialog(null);
+	    filepath =file.toURI().toString();
+	    
 		Group root =new Group();
 		Button button1=new Button();
 		Button button2=new Button();
@@ -57,7 +72,7 @@ public class Media_Player extends Application{
 	    Button button6 =new Button();
 	    Button button7 =new Button();
 		
-		Media media=new Media("file:///c:/videos/Befikra.mp4");
+		Media media=new Media("file:///c://videos/Befikra.mp4");
 		MediaPlayer mediaplayer =new MediaPlayer(media);
 		MediaView view =new MediaView(mediaplayer);
 		
@@ -66,9 +81,10 @@ public class Media_Player extends Application{
 	    
 	    width.bind(Bindings.selectDouble(view.sceneProperty(), "width"));
 	    height.bind(Bindings.selectDouble(view.sceneProperty(), "height"));
-	    
-	    view.setPreserveRatio(true);
+	    view.setPreserveRatio(false);
+	    Rectangle2D screen = Screen.getPrimary().getVisualBounds();
 		
+	    
 		Image img = new Image(getClass().getClassLoader().getResourceAsStream("img/start.png"),30,20,true,true);
 		Image img1 = new Image(getClass().getClassLoader().getResourceAsStream("img/pause.png"),30,20,true,true);
 		Image img2 = new Image(getClass().getClassLoader().getResourceAsStream("img/fast.png"),30,20,true,true);
@@ -86,17 +102,39 @@ public class Media_Player extends Application{
 		button6.setGraphic(new ImageView(img5));
 		button7.setGraphic(new ImageView(img6));
 		
+		button1.setStyle("-fx-background-color: red; -fx-text-fill: white;");
+		button4.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-position:Right; -fx-background-size:20 20 ");
+		
+		int h=mediaplayer.getMedia().getHeight();
+		int w=mediaplayer.getMedia().getWidth();
+		
 		Slider slider =new Slider();
 		Slider volumeslider =new Slider();
 		VBox vbox=new VBox();
+		
+		HBox hbox=new HBox();
+	    HBox hbox_l =new HBox();
+	    HBox hbox_c=new HBox();
+	    HBox hbox_r=new HBox();
+	    HBox hbox_cr=new HBox();
+	    
+	   
+	    hbox_l.getChildren().addAll(button1,button5); 
+	    hbox_c.getChildren().addAll(button7,button2,button3);
+	    hbox_r.getChildren().add(button4);
+	    hbox_cr.getChildren().addAll(hbox_c,hbox_r);
+		
 		vbox.getChildren().add(slider);
+		hbox.getChildren().addAll(hbox_l,hbox_cr);
+		
 		
 		root.getChildren().add(view);
 		root.getChildren().add(vbox);
-		root.getChildren().addAll(button1,button2,button3,button4,button5,button7);
+		root.getChildren().add(hbox);
 		
-		Scene scene=new Scene(root);
+		final Scene scene=new Scene(root);
 		args.setScene(scene);
+		args.setTitle("Movie Player");
 		args.show();
 		
 		
@@ -108,14 +146,13 @@ public class Media_Player extends Application{
 		slider.setShowTickLabels(true);
 		slider.setShowTickMarks(true);
 	
-		mediaplayer.setAutoPlay(true);
+	
 		
 		button1.setOnMouseClicked(new EventHandler<MouseEvent>()                  // Play button
 		{
 
 			@Override
 			public void handle(MouseEvent arg0) {
-				// TODO Auto-generated method stub
 				mediaplayer.play();
 				
 			}});
@@ -125,7 +162,6 @@ public class Media_Player extends Application{
 
 			@Override
 			public void handle(MouseEvent arg0) {
-				// TODO Auto-generated method stub
 				mediaplayer.pause();
 			}});
 
@@ -135,7 +171,6 @@ public class Media_Player extends Application{
 			
 			@Override
 			public void handle(MouseEvent arg0) {
-				// TODO Auto-generated method stub
 				if(mediaplayer.getRate()+1 <=8 )
 				{
 				mediaplayer.setRate(mediaplayer.getRate()*2);
@@ -148,14 +183,13 @@ public class Media_Player extends Application{
 					
 					@Override
 					public void handle(MouseEvent arg0) {
-						// TODO Auto-generated method stub
 						if(mediaplayer.getRate()>=0.25 )
 						{
 						mediaplayer.setRate(mediaplayer.getRate()/2);
 						}
 					}});
 		
-		button4.setOnMouseClicked(new EventHandler<MouseEvent>()                   // Enter into full screen
+		button4.setOnMouseClicked(new EventHandler<MouseEvent>()                   // Enter into full screen on clicking full screen icon 
 		{
             
 			@Override
@@ -164,25 +198,7 @@ public class Media_Player extends Application{
 				if(args.isFullScreen()==false)
 				{
 				args.setFullScreen(true);
-				int h=mediaplayer.getMedia().getHeight();
-				int w=mediaplayer.getMedia().getWidth();
-				
-				args.setMinWidth(w);
-				args.setMinHeight(h);
-				vbox.setMinWidth(w+700);
-				vbox.setTranslateY(h+320);
-				button1.setTranslateX(w-635);
-				button1.setTranslateY(h+350);
-				button2.setTranslateY(h+350);
-				button2.setTranslateX(w-585);
-				button3.setTranslateY(h+350);
-				button3.setTranslateX(w-535);
-				button4.setTranslateY(h+350);
-				button4.setTranslateX(w+680);
-				button5.setTranslateY(h+350);
-				button5.setTranslateX(w-435);
-				button7.setTranslateY(h+350);
-				button7.setTranslateX(w-485);
+	
 				}
 				else
 				{
@@ -190,23 +206,7 @@ public class Media_Player extends Application{
 			    int h=mediaplayer.getMedia().getHeight();
 				int w=mediaplayer.getMedia().getWidth();
 				
-				args.setMinWidth(w);
-				args.setMinHeight(h);
-				
-				vbox.setMinWidth(w);
-				vbox.setTranslateY(h-90);
-				button1.setTranslateX(w-635);
-				button1.setTranslateY(h-72);
-				button2.setTranslateY(h-72);
-				button2.setTranslateX(w-585);
-				button3.setTranslateY(h-72);
-				button3.setTranslateX(w-535);
-				button4.setTranslateY(h-72);
-				button4.setTranslateX(w-45);
-				button5.setTranslateY(h-72);
-				button5.setTranslateX(w-435);
-				button7.setTranslateY(h-72);
-				button7.setTranslateX(w-485);
+		
 				}
 			}});
 		
@@ -218,25 +218,22 @@ public class Media_Player extends Application{
 		    	if(args.isFullScreen()==false)
 				{
 				args.setFullScreen(true);
-				int h=mediaplayer.getMedia().getHeight();
-				int w=mediaplayer.getMedia().getWidth();
+				vbox.setPrefWidth(screen.getWidth());
+				vbox.setMinWidth(screen.getWidth());
+				vbox.setTranslateY(screen.getHeight()/1.2);
+				hbox.setMinWidth(screen.getWidth());
+				hbox.setTranslateY(screen.getHeight()/1.15);
+				hbox_l.setSpacing((args.getWidth())/24);
+				hbox_c.setSpacing((args.getWidth())/20);
+				hbox_cr.setSpacing((args.getWidth())/3);
 				
-				args.setMinWidth(w);
-				args.setMinHeight(h);
-				vbox.setMinWidth(w+700);
-				vbox.setTranslateY(h+320);
-				button1.setTranslateX(w-635);
-				button1.setTranslateY(h+350);
-				button2.setTranslateY(h+350);
-				button2.setTranslateX(w-585);
-				button3.setTranslateY(h+350);
-				button3.setTranslateX(w-535);
-				button4.setTranslateY(h+350);
-				button4.setTranslateX(w+680);
-				button5.setTranslateY(h+350);
-				button5.setTranslateX(w-435);
-				button7.setTranslateY(h+350);
-				button7.setTranslateX(w-485);
+				hbox.setSpacing((args.getWidth())/3.5);
+				System.out.println("screen width"+media.getWidth());
+				System.out.println("screen height"+media.getHeight());
+				
+				System.out.println("args width"+args.getWidth());
+				System.out.println("args height"+args.getHeight());
+				
 				}
 				else
 				{
@@ -244,23 +241,19 @@ public class Media_Player extends Application{
 			    int h=mediaplayer.getMedia().getHeight();
 				int w=mediaplayer.getMedia().getWidth();
 				
-				args.setMinWidth(w);
-				args.setMinHeight(h);
-				
 				vbox.setMinWidth(w);
-				vbox.setTranslateY(h-90);
-				button1.setTranslateX(w-635);
-				button1.setTranslateY(h-72);
-				button2.setTranslateY(h-72);
-				button2.setTranslateX(w-585);
-				button3.setTranslateY(h-72);
-				button3.setTranslateX(w-535);
-				button4.setTranslateY(h-72);
-				button4.setTranslateX(w-45);
-				button5.setTranslateY(h-72);
-				button5.setTranslateX(w-435);
-				button7.setTranslateY(h-72);
-				button7.setTranslateX(w-485);
+				vbox.setTranslateY(h/1.2);
+				hbox.setMinWidth(w);
+				hbox.setTranslateY(h/1.15);
+				
+				
+				
+				hbox_l.setSpacing((args.getWidth())/24);
+				hbox_c.setSpacing((args.getWidth())/20);
+				hbox_cr.setSpacing((args.getWidth())/3);
+				
+				hbox.setSpacing((args.getWidth())/3.5);
+				
 			    
 			    
 				}
@@ -354,34 +347,54 @@ public class Media_Player extends Application{
 		mediaplayer.setOnReady(new Runnable()
 		{
 			public void run()
-			{
+			{   
+				mediaplayer.setAutoPlay(true);
 				int h=mediaplayer.getMedia().getHeight();
 				int w=mediaplayer.getMedia().getWidth();
 				
-				args.setMinWidth(w);
-				args.setMinHeight(h);
+				args.setMinWidth(0);
+				args.setMinHeight(0);
 				
+		        args.setWidth(w);
+		        args.setHeight(h);
+		        
+		        args.setMaxWidth(screen.getWidth());
+		        args.setMaxHeight(screen.getHeight());
+		        args.centerOnScreen();
+		        args.setResizable(true);
+		       
 				vbox.setMinWidth(w);
-				vbox.setTranslateY(h-90);
-				button1.setTranslateX(w-635);
-				button1.setTranslateY(h-72);
-				button2.setTranslateY(h-72);
-				button2.setTranslateX(w-585);
-				button3.setTranslateY(h-72);
-				button3.setTranslateX(w-535);
-				button4.setTranslateY(h-72);
-				button4.setTranslateX(w-45);
-				button5.setTranslateY(h-72);
-				button5.setTranslateX(w-435);
-				button7.setTranslateY(h-72);
-				button7.setTranslateX(w-485);
+				vbox.setTranslateY(h/1.2);
+				hbox.setMinWidth(w);
+				hbox.setTranslateY(h/1.15);
 				
+				
+				
+				hbox_l.setSpacing((args.getWidth())/24);
+				hbox_c.setSpacing((args.getWidth())/20);
+				hbox_cr.setSpacing((args.getWidth())/3);
+				
+				hbox.setSpacing((args.getWidth())/3.5);
+			/*	hbox_l.setSpacing((media.getWidth())/24);
+				hbox_c.setSpacing((media.getWidth())/20);
+				hbox_cr.setSpacing((media.getWidth())/3);
+				hbox.setSpacing((media.getWidth())/3.5);*/
+				
+				System.out.println("screen width"+screen.getWidth());
+				System.out.println("screen height"+screen.getHeight());
+				
+				System.out.println("media width"+media.getWidth());
+				System.out.println("media height"+media.getHeight());
+				
+				System.out.println("args width"+args.getWidth());
+				System.out.println("args height"+args.getHeight());
 			}
 		});
 		
+	
 		slider.setOnMouseClicked(new EventHandler<MouseEvent>()
 		{
-
+             
 			@Override
 			public void handle(MouseEvent arg0) {
 				// TODO Auto-generated method stub

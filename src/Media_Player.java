@@ -1,51 +1,33 @@
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
 
-import javax.imageio.ImageIO;
-import javax.swing.JButton;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import com.sun.javafx.iio.ImageLoader;
-import com.sun.prism.paint.Color;
-
-import javafx.application.*;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.application.Application;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-public class Media_Player extends Application{
+public class Media_Player extends Application {
 
 	public static void main(String args[])
 	{
@@ -72,7 +54,7 @@ public class Media_Player extends Application{
 	    Button button6 =new Button();
 	    Button button7 =new Button();
 		
-		Media media=new Media("file:///c://videos/Befikra.mp4");
+		Media media=new Media(filepath);
 		MediaPlayer mediaplayer =new MediaPlayer(media);
 		MediaView view =new MediaView(mediaplayer);
 		
@@ -81,7 +63,7 @@ public class Media_Player extends Application{
 	    
 	    width.bind(Bindings.selectDouble(view.sceneProperty(), "width"));
 	    height.bind(Bindings.selectDouble(view.sceneProperty(), "height"));
-	    view.setPreserveRatio(false);
+	    view.setPreserveRatio(true);
 	    Rectangle2D screen = Screen.getPrimary().getVisualBounds();
 		
 	    
@@ -109,7 +91,6 @@ public class Media_Player extends Application{
 		int w=mediaplayer.getMedia().getWidth();
 		
 		Slider slider =new Slider();
-		Slider volumeslider =new Slider();
 		VBox vbox=new VBox();
 		
 		HBox hbox=new HBox();
@@ -118,7 +99,7 @@ public class Media_Player extends Application{
 	    HBox hbox_r=new HBox();
 	    HBox hbox_cr=new HBox();
 	    
-	   
+	    
 	    hbox_l.getChildren().addAll(button1,button5); 
 	    hbox_c.getChildren().addAll(button7,button2,button3);
 	    hbox_r.getChildren().add(button4);
@@ -127,26 +108,23 @@ public class Media_Player extends Application{
 		vbox.getChildren().add(slider);
 		hbox.getChildren().addAll(hbox_l,hbox_cr);
 		
-		
+		final DoubleProperty width1 = hbox.prefWidthProperty();
+	    final DoubleProperty height1 = hbox.prefHeightProperty();
+	    
+	    width1.bind(Bindings.selectDouble(hbox.sceneProperty(), "width"));
+	    height1.bind(Bindings.selectDouble(hbox.sceneProperty(), "height"));
+	    
+	    
 		root.getChildren().add(view);
 		root.getChildren().add(vbox);
 		root.getChildren().add(hbox);
+	
 		
 		final Scene scene=new Scene(root);
 		args.setScene(scene);
 		args.setTitle("Movie Player");
 		args.show();
-		
-		
-		
-		
-		slider.setMin(0.0);
-		slider.setValue(0.0);
-		slider.setMax(mediaplayer.getTotalDuration().toSeconds());
-		slider.setShowTickLabels(true);
-		slider.setShowTickMarks(true);
-	
-	
+
 		
 		button1.setOnMouseClicked(new EventHandler<MouseEvent>()                  // Play button
 		{
@@ -189,6 +167,7 @@ public class Media_Player extends Application{
 						}
 					}});
 		
+		
 		button4.setOnMouseClicked(new EventHandler<MouseEvent>()                   // Enter into full screen on clicking full screen icon 
 		{
             
@@ -228,8 +207,8 @@ public class Media_Player extends Application{
 				hbox_cr.setSpacing((args.getWidth())/3);
 				
 				hbox.setSpacing((args.getWidth())/3.5);
-				System.out.println("screen width"+media.getWidth());
-				System.out.println("screen height"+media.getHeight());
+				System.out.println("media width"+media.getWidth());
+				System.out.println("media height"+media.getHeight());
 				
 				System.out.println("args width"+args.getWidth());
 				System.out.println("args height"+args.getHeight());
@@ -267,6 +246,8 @@ public class Media_Player extends Application{
 			@Override
 			public void handle(KeyEvent event) {
 				// TODO Auto-generated method stub
+				if (event.getCode().equals(KeyCode.SPACE)||event.getCode().equals(KeyCode.SHIFT)||event.getCode().equals(KeyCode.RIGHT)||event.getCode().equals(KeyCode.LEFT)||event.getCode().equals(KeyCode.UP)||event.getCode().equals(KeyCode.DOWN))
+				{
 				if (event.getCode().equals(KeyCode.SPACE))
 	            {
 				  if(mediaplayer.getStatus().toString()=="PLAYING")
@@ -279,32 +260,22 @@ public class Media_Player extends Application{
 				  }
 				  
 	            }
+				if(event.getCode().equals(KeyCode.SHIFT)||event.getCode().equals(KeyCode.RIGHT))
+				{
+					slider.setValue(slider.getValue()+20);
+					mediaplayer.seek(Duration.seconds(slider.getValue()));
+				}
+				if(event.getCode().equals(KeyCode.SHIFT)||event.getCode().equals(KeyCode.LEFT))
+					{
+						slider.setValue(slider.getValue()-20);
+						mediaplayer.seek(Duration.seconds(slider.getValue()));
+					}
 				
+				}
 			}
 	        
 	    });
 		
-		
-	button5.setOnMouseMoved(new EventHandler<MouseEvent>()                           // Volume button hover over
-				{
-
-					@Override
-					public void handle(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
-						int h=mediaplayer.getMedia().getHeight();
-						int w=mediaplayer.getMedia().getWidth();
-						
-						args.setMinWidth(w);
-						args.setMinHeight(h);
-						root.getChildren().add(volumeslider);
-						
-						volumeslider.setTranslateY(h-67);
-						volumeslider.setTranslateX(w-452);
-					
-					}
-			
-				});
 			
 	button5.setOnMouseClicked(new EventHandler<MouseEvent>()                          // volume key clicked
 	{
@@ -368,40 +339,55 @@ public class Media_Player extends Application{
 				hbox.setMinWidth(w);
 				hbox.setTranslateY(h/1.15);
 				
+				slider.setMin(0.0);
+				slider.setValue(0.0);
+				slider.setMax(mediaplayer.getTotalDuration().toSeconds());
+				slider.setShowTickLabels(true);
+				slider.setShowTickMarks(true);
 				
 				
 				hbox_l.setSpacing((args.getWidth())/24);
 				hbox_c.setSpacing((args.getWidth())/20);
 				hbox_cr.setSpacing((args.getWidth())/3);
-				
 				hbox.setSpacing((args.getWidth())/3.5);
-			/*	hbox_l.setSpacing((media.getWidth())/24);
-				hbox_c.setSpacing((media.getWidth())/20);
-				hbox_cr.setSpacing((media.getWidth())/3);
-				hbox.setSpacing((media.getWidth())/3.5);*/
 				
-				System.out.println("screen width"+screen.getWidth());
-				System.out.println("screen height"+screen.getHeight());
-				
-				System.out.println("media width"+media.getWidth());
-				System.out.println("media height"+media.getHeight());
-				
-				System.out.println("args width"+args.getWidth());
-				System.out.println("args height"+args.getHeight());
+				scene.widthProperty().addListener(new ChangeListener<Number>() {
+				    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
+				        vbox.setMinWidth((double) newSceneWidth);
+					    view.setFitWidth((double) newSceneWidth);
+					   
+				    }
+				});
+				scene.heightProperty().addListener(new ChangeListener<Number>() {
+				    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
+				        System.out.println("Height: " + newSceneHeight);
+				        view.setFitHeight((double) newSceneHeight);
+				    }
+				});
 			}
 		});
 		
 	
-		slider.setOnMouseClicked(new EventHandler<MouseEvent>()
-		{
-             
-			@Override
-			public void handle(MouseEvent arg0) {
-				// TODO Auto-generated method stub
-				slider.setValue(slider.getValue()+20);
-				mediaplayer.seek(Duration.seconds(slider.getValue()));
-			}
+		mediaplayer.currentTimeProperty().addListener(new ChangeListener<Duration>()
+				{
+
+					@Override
+					public void changed(ObservableValue<? extends Duration> arg0, Duration duration, Duration arg2) {
+						// TODO Auto-generated method stub
+						slider.setValue(arg2.toSeconds());
+					}
 			
-		});
+				});
+		
+		slider.setOnMousePressed(new EventHandler<MouseEvent>()
+				{
+
+					@Override
+					public void handle(MouseEvent arg0) {
+						// TODO Auto-generated method stub
+						mediaplayer.seek(Duration.seconds(slider.getValue()));
+					}});
+		
 	}
+
 }

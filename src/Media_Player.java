@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.IOException;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
@@ -12,6 +14,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -22,6 +25,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -66,7 +70,6 @@ public class Media_Player extends Application {
 	    view.setPreserveRatio(true);
 	    Rectangle2D screen = Screen.getPrimary().getVisualBounds();
 		
-	    
 		Image img = new Image(getClass().getClassLoader().getResourceAsStream("img/start.png"),30,20,true,true);
 		Image img1 = new Image(getClass().getClassLoader().getResourceAsStream("img/pause.png"),30,20,true,true);
 		Image img2 = new Image(getClass().getClassLoader().getResourceAsStream("img/fast.png"),30,20,true,true);
@@ -84,8 +87,8 @@ public class Media_Player extends Application {
 		button6.setGraphic(new ImageView(img5));
 		button7.setGraphic(new ImageView(img6));
 		
-		button1.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-		button4.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-position:Right; -fx-background-size:20 20 ");
+		//button1.setStyle("-fx-background-color: white; -fx-text-fill: white;");
+		//button4.setStyle("-fx-background-color: white; -fx-text-fill: white; -fx-position:center; -fx-background-size:5 5 ");
 		
 		int h=mediaplayer.getMedia().getHeight();
 		int w=mediaplayer.getMedia().getWidth();
@@ -104,9 +107,9 @@ public class Media_Player extends Application {
 	    hbox_c.getChildren().addAll(button7,button2,button3);
 	    hbox_r.getChildren().add(button4);
 	    hbox_cr.getChildren().addAll(hbox_c,hbox_r);
+	    hbox.getChildren().addAll(hbox_l,hbox_cr);
+		vbox.getChildren().addAll(slider);
 		
-		vbox.getChildren().add(slider);
-		hbox.getChildren().addAll(hbox_l,hbox_cr);
 		
 		final DoubleProperty width1 = hbox.prefWidthProperty();
 	    final DoubleProperty height1 = hbox.prefHeightProperty();
@@ -120,7 +123,7 @@ public class Media_Player extends Application {
 		root.getChildren().add(hbox);
 	
 		
-		final Scene scene=new Scene(root);
+		final Scene scene=new Scene(root,600,600,Color.BLACK);
 		args.setScene(scene);
 		args.setTitle("Movie Player");
 		args.show();
@@ -301,7 +304,6 @@ public class Media_Player extends Application {
 
 				@Override
 				public void handle(MouseEvent arg0) {
-					//System.out.println(root.isVisible());
 					int h=mediaplayer.getMedia().getHeight();
 					int w=mediaplayer.getMedia().getWidth();
 					
@@ -331,43 +333,96 @@ public class Media_Player extends Application {
 		        
 		        args.setMaxWidth(screen.getWidth());
 		        args.setMaxHeight(screen.getHeight());
+		        
 		        args.centerOnScreen();
 		        args.setResizable(true);
 		       
 				vbox.setMinWidth(w);
 				vbox.setTranslateY(h/1.2);
-				hbox.setMinWidth(w);
+				hbox.setMinWidth(0.0);
 				hbox.setTranslateY(h/1.15);
+			
 				
 				slider.setMin(0.0);
 				slider.setValue(0.0);
 				slider.setMax(mediaplayer.getTotalDuration().toSeconds());
 				slider.setShowTickLabels(true);
 				slider.setShowTickMarks(true);
-				
+
 				
 				hbox_l.setSpacing((args.getWidth())/24);
 				hbox_c.setSpacing((args.getWidth())/20);
 				hbox_cr.setSpacing((args.getWidth())/3);
 				hbox.setSpacing((args.getWidth())/3.5);
-				
+			}
+		});
 				scene.widthProperty().addListener(new ChangeListener<Number>() {
 				    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
 				        vbox.setMinWidth((double) newSceneWidth);
-					    view.setFitWidth((double) newSceneWidth);
-					   
+						hbox.setMinWidth((double) newSceneWidth);
+				        hbox_l.setSpacing((double)(newSceneWidth)/24);
+						hbox_c.setSpacing((double)(newSceneWidth)/20);
+						hbox_cr.setSpacing((double)(newSceneWidth)/2.5);
+						hbox.setSpacing((double)(newSceneWidth)/5);
+						
+						scene.setOnMouseEntered(new EventHandler<MouseEvent>
+					    () {
+
+					        @Override
+					        public void handle(MouseEvent t) {
+					        if((double)newSceneWidth<600)
+					        {
+					         vbox.setVisible(false);
+					         hbox.setVisible(false);
+					        }
+					        else
+					        {
+					        	vbox.setVisible(true);
+						        hbox.setVisible(true);
+					        }
+					        }
+					    });
+						if((double)newSceneWidth<600)
+						{   
+							vbox.setVisible(false);
+							hbox.setVisible(false);
+						}
+						else
+						{   vbox.setVisible(true);
+							hbox.setVisible(true);
+						}
 				    }
 				});
 				scene.heightProperty().addListener(new ChangeListener<Number>() {
 				    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) {
-				        System.out.println("Height: " + newSceneHeight);
-				        view.setFitHeight((double) newSceneHeight);
+				        vbox.setTranslateY((double)(newSceneHeight)/1.2);
+				        hbox.setTranslateY((double)(newSceneHeight)/1.15);
 				    }
 				});
-			}
-		});
 		
-	
+		
+		scene.setOnMouseEntered(new EventHandler<MouseEvent>
+	    () {
+
+	        @Override
+	        public void handle(MouseEvent t) {
+	         vbox.setVisible(true);
+	         hbox.setVisible(true);
+	        }
+	    });
+		System.out.println("Time"+System.currentTimeMillis());
+		
+		
+		scene.setOnMouseExited(new EventHandler<MouseEvent>(){
+
+			@Override
+			public void handle(MouseEvent event) {
+				vbox.setVisible(false);
+				hbox.setVisible(false);
+				
+			}
+			
+		});
 		mediaplayer.currentTimeProperty().addListener(new ChangeListener<Duration>()
 				{
 

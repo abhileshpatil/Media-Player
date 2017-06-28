@@ -29,6 +29,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -47,7 +48,7 @@ public class Media_Player extends Application {
 		
 		String filepath;
 		FileChooser open=new FileChooser();
-		FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Select a file","*.mp4");
+		FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Select a file","*.mp4","*.mp3");
 	    open.getExtensionFilters().add(filter);
 	    File file= open.showOpenDialog(null);
 	    filepath =file.toURI().toString();
@@ -63,6 +64,7 @@ public class Media_Player extends Application {
 		MediaPlayer mediaplayer =new MediaPlayer(media);
 		MediaView view =new MediaView(mediaplayer);
 		
+       
 		final DoubleProperty width = view.fitWidthProperty();
 	    final DoubleProperty height = view.fitHeightProperty();
 	    
@@ -78,6 +80,7 @@ public class Media_Player extends Application {
 		Image img4 = new Image(getClass().getClassLoader().getResourceAsStream("img/volume.png"),30,20,true,true);
 		Image img5 = new Image(getClass().getClassLoader().getResourceAsStream("img/mute.png"),30,20,true,true);
 		Image img6 = new Image(getClass().getClassLoader().getResourceAsStream("img/slow.png"),30,20,true,true);
+		Image img7 = new Image(getClass().getClassLoader().getResourceAsStream("img/audio.png"),350,350,true,true);
 		
 	    
 		button1.setGraphic(new ImageView(img1));
@@ -86,8 +89,6 @@ public class Media_Player extends Application {
 		button5.setGraphic(new ImageView(img4));
 		button7.setGraphic(new ImageView(img6));
 		
-		//button1.setStyle("-fx-background-color: white; -fx-text-fill: white;");
-		//button4.setStyle("-fx-background-color: white; -fx-text-fill: white; -fx-position:center; -fx-background-size:5 5 ");
 		
 		int h=mediaplayer.getMedia().getHeight();
 		int w=mediaplayer.getMedia().getWidth();
@@ -116,7 +117,6 @@ public class Media_Player extends Application {
 	    width1.bind(Bindings.selectDouble(hbox.sceneProperty(), "width"));
 	    height1.bind(Bindings.selectDouble(hbox.sceneProperty(), "height"));
 	    
-	    
 		root.getChildren().add(view);
 		root.getChildren().add(vbox);
 		root.getChildren().add(hbox);
@@ -124,9 +124,8 @@ public class Media_Player extends Application {
 		
 		final Scene scene=new Scene(root,700,700,Color.BLACK);
 		args.setScene(scene);
-		args.setTitle("Movie Player");
+		args.setTitle("Media Player");
 		args.show();
-
 		
 		button1.setOnMouseClicked(new EventHandler<MouseEvent>()                  // Play and pause button
 		{
@@ -179,12 +178,26 @@ public class Media_Player extends Application {
 				// TODO Auto-generated method stub
 				if(args.isFullScreen()==false)
 				{
-				args.setFullScreen(true);
+					args.setFullScreen(true);
+					vbox.setMinWidth(screen.getWidth());
+					vbox.setTranslateY(screen.getHeight()/1.2);
+					hbox.setMinWidth(screen.getWidth());
+					hbox.setTranslateY(screen.getHeight()/1.15);
+					hbox_c.setSpacing((args.getWidth())/20);
+					hbox_cr.setSpacing((args.getWidth())/3);
+					hbox.setSpacing((args.getWidth())/3.5);
 	
 				}
 				else
 				{
-			    args.setFullScreen(false);
+					args.setFullScreen(false);
+				    vbox.setMinWidth(scene.getWidth());
+					vbox.setTranslateY(scene.getHeight()/1.2);
+					hbox.setMinWidth(0.0);
+					hbox.setTranslateY(scene.getHeight()/1.15);
+					hbox_c.setSpacing((args.getWidth())/20);
+					hbox_cr.setSpacing((args.getWidth())/4);
+					hbox.setSpacing((args.getWidth())/4);
 		
 				}
 			}});
@@ -255,13 +268,13 @@ public class Media_Player extends Application {
 					}
 				if(event.getCode().equals(KeyCode.SHIFT)||event.getCode().equals(KeyCode.UP))
 				{
-					volumeslider.setValue(volumeslider.getValue()+5);
 					mediaplayer.setVolume(volumeslider.getValue()+5);
+					volumeslider.setValue(volumeslider.getValue()+5);
 				}
 				if(event.getCode().equals(KeyCode.SHIFT)||event.getCode().equals(KeyCode.DOWN))
 				{
-					volumeslider.setValue(volumeslider.getValue()-5);
 					mediaplayer.setVolume(volumeslider.getValue()-5);
+					volumeslider.setValue(volumeslider.getValue()-5);
 				}
 				}
 			}
@@ -353,6 +366,7 @@ public class Media_Player extends Application {
 				hbox.setMinWidth(0.0);
 				hbox.setTranslateY(scene.getHeight()/1.15);
 				
+				
 				slider.setMin(0.0);
 				slider.setValue(0.0);
 				volumeslider.setValue(mediaplayer.getVolume()*100);
@@ -367,11 +381,18 @@ public class Media_Player extends Application {
 				hbox_c.setSpacing((args.getWidth())/20);
 				hbox_cr.setSpacing((args.getWidth())/4);
 				hbox.setSpacing((args.getWidth())/4);
+				
+			    if(mediaplayer.impl_getLatestFrame()==null)
+				{
+					root.getChildren().add(new ImageView(img7));
+			        img7.isPreserveRatio();
+				   
+				}
 			}
 		});
 				scene.widthProperty().addListener(new ChangeListener<Number>() {
 				    @Override public void changed(ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) {
-				        vbox.setPrefWidth((double) newSceneWidth);
+				        vbox.setMinWidth((double) newSceneWidth);
 						hbox.setMinWidth((double) newSceneWidth);
 						hbox_c.setSpacing((double)(newSceneWidth)/25);
 						hbox_cr.setSpacing((double)(newSceneWidth)/5);
